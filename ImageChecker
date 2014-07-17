@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+import os
+from xml.dom.minidom import *
+
+# Python Script to generate content for ImageData.as File
+# Change the path's appropriately to the folder where respective assets are placed
+# Output is written to a file OutData.txt
+# Input is given through a file inp.txt
+
+
+xmlPath    = 'logo/assets/flags/level-data/LevelPack'
+imgPath    = 'logo/assets/flags/logos/'
+printPath  = '../../../../../assets/flags/logos/'
+
+
+out        = open('OutData.txt', 'w')
+inp				 = open('inp.txt','r')
+it1 = 1
+cnt = 0
+arr = []
+for line in inp:
+    arr.append( line.replace('\n','') )
+inp.close()
+
+while (it1!=20):
+	newPath = xmlPath+str(arr[it1-1])+".xml"
+	if (os.path.exists(newPath)):
+		file = open(newPath, 'r')
+		data = file.read()
+		file.close()
+	else :
+		break
+	print newPath
+	data = data.replace('&','and')
+	dom = parseString(data)
+	xmlTag = dom.getElementsByTagName('answer')
+	it2 = 0
+	
+	while it2 < len(xmlTag):
+		xmlData = xmlTag[it2].toxml().replace('<answer>','').replace('</answer>','').replace(' ','_').lower()
+		image = imgPath+xmlData+'.png'
+		if (os.path.exists(image)):
+			out.write('[Embed(source="')
+			out.write(printPath+xmlData+".png")
+			out.write('")]\n')
+			out.write('public static const P')
+			out.write(str(it1-1)+'L'+str(it2)+':Class\n\n')
+		else:
+			 print "ERROR with file : "+image
+		it2 += 1
+	it1 += 1
+
+out.close()
